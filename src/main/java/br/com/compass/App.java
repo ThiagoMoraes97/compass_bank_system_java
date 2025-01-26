@@ -1,5 +1,8 @@
 package br.com.compass;
 
+import br.com.compass.db.DB;
+
+import java.sql.Connection;
 import java.util.Scanner;
 
 public class App {
@@ -7,13 +10,16 @@ public class App {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
 
+        Connection conn = DB.getConnection();
+        DB.closeConnection();
+
         mainMenu(scanner);
         
         scanner.close();
         System.out.println("Application closed");
     }
 
-    public static void mainMenu(Scanner scanner) {
+   public static void mainMenu(Scanner scanner) {
         boolean running = true;
 
         while (running) {
@@ -28,6 +34,7 @@ public class App {
 
             switch (option) {
                 case 1:
+                    // TODO: Implement Login
                     bankMenu(scanner);
                     return;
                 case 2:
@@ -90,5 +97,4 @@ public class App {
             }
         }
     }
-    
 }
