@@ -1,6 +1,7 @@
 package br.com.compass;
 
 import br.com.compass.db.DB;
+import br.com.compass.model.services.UserService;
 
 import java.sql.Connection;
 import java.util.Scanner;
@@ -10,16 +11,16 @@ public class App {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
 
-        Connection conn = DB.getConnection();
-        DB.closeConnection();
+        UserService userService = new UserService();
+        userService.createUser(scanner);
 
-        mainMenu(scanner);
+        /*mainMenu(scanner);*/
         
         scanner.close();
         System.out.println("Application closed");
     }
 
-   public static void mainMenu(Scanner scanner) {
+   /*public static void mainMenu(Scanner scanner) {
         boolean running = true;
 
         while (running) {
@@ -96,5 +97,5 @@ public class App {
                     System.out.println("Invalid option! Please try again.");
             }
         }
-    }
+    }*/
 }
