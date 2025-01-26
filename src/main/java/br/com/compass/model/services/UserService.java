@@ -1,5 +1,6 @@
 package br.com.compass.model.services;
 
+import br.com.compass.db.DbException;
 import br.com.compass.model.dao.AccountDao;
 import br.com.compass.model.dao.DaoFactory;
 import br.com.compass.model.dao.UserDao;
@@ -13,6 +14,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.Scanner;
 
 public class UserService {
+
+    UserDao userDao = DaoFactory.createUserDao();
+    AccountDao accountDao = DaoFactory.createAccountDao();
 
     public void createUser(Scanner sc) {
 
@@ -37,9 +41,6 @@ public class UserService {
 
         Account account = new Account(accountType, user);
 
-        UserDao userDao = DaoFactory.createUserDao();
-        AccountDao accountDao = DaoFactory.createAccountDao();
-
         int user_id = userDao.insert(user);
         user.setId(user_id);
 
@@ -56,5 +57,17 @@ public class UserService {
         String cpf = sc.nextLine();
         System.out.print("Enter your password: ");
         String password = sc.nextLine();
+
+        User user = userDao.findByCPF(cpf);
+
+        if (user == null) {
+            throw new DbException("User or password is incorrect");
+        }
+
+        if (user.getPassword().equals(password)) {
+            System.out.println("Login successful!");
+        } else {
+            throw new DbException("User or password is incorrect");
+        }
     }
 }

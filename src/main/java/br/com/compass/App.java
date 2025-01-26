@@ -1,9 +1,6 @@
 package br.com.compass;
 
-import br.com.compass.db.DB;
 import br.com.compass.model.services.UserService;
-
-import java.sql.Connection;
 import java.util.Scanner;
 
 public class App {
@@ -11,16 +8,14 @@ public class App {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
 
-        UserService userService = new UserService();
-        userService.createUser(scanner);
-
-        /*mainMenu(scanner);*/
+        mainMenu(scanner);
         
         scanner.close();
         System.out.println("Application closed");
     }
 
-   /*public static void mainMenu(Scanner scanner) {
+   public static void mainMenu(Scanner scanner) {
+        UserService userService = new UserService();
         boolean running = true;
 
         while (running) {
@@ -32,16 +27,17 @@ public class App {
             System.out.print("Choose an option: ");
 
             int option = scanner.nextInt();
+            scanner.nextLine();
 
             switch (option) {
                 case 1:
-                    // TODO: Implement Login
+                    userService.loginUser(scanner);
                     bankMenu(scanner);
                     return;
                 case 2:
-                    UserService userService = new UserService();
                     userService.createUser(scanner);
                     System.out.println("Account Opening.");
+                    userService.loginUser(scanner);
                     break;
                 case 0:
                     running = false;
@@ -98,5 +94,5 @@ public class App {
                     System.out.println("Invalid option! Please try again.");
             }
         }
-    }*/
+    }
 }

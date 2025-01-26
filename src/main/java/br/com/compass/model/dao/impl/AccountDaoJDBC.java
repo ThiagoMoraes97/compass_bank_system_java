@@ -1,5 +1,7 @@
 package br.com.compass.model.dao.impl;
 
+import br.com.compass.db.DB;
+import br.com.compass.db.DbException;
 import br.com.compass.model.dao.AccountDao;
 import br.com.compass.model.entities.Account;
 
@@ -40,41 +42,12 @@ public class AccountDaoJDBC implements AccountDao {
             }
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new DbException(e.getMessage());
         } finally {
-            // Close resources
-            try {
-                if (rs != null) rs.close();
-                if (stmt != null) stmt.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+            DB.closeStatement(stmt);
+            DB.closeResultSet(rs);
         }
         return 0;
     }
 
-    public Account findByCPF(String cpf) {
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-
-        try {
-            String sql = "SELECT * FROM accounts WHERE cpf = ?";
-
-            stmt = conn.prepareStatement(sql);
-            stmt.setString(1, cpf);
-            rs = stmt.executeQuery();
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            // Close resources
-            try {
-                if (rs != null) rs.close();
-                if (stmt != null) stmt.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
-        return 0;
-    }
 }

@@ -1,6 +1,7 @@
 package br.com.compass.model.dao.impl;
 
 import br.com.compass.db.DB;
+import br.com.compass.db.DbException;
 import br.com.compass.model.dao.UserDao;
 import br.com.compass.model.entities.User;
 
@@ -43,16 +44,42 @@ public class UserDaoJDBC implements UserDao {
             }
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new DbException(e.getMessage());
         } finally {
-            // Close resources
-            try {
-                if (rs != null) rs.close();
-                if (stmt != null) stmt.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+            DB.closeStatement(stmt);
+            DB.closeResultSet(rs);
         }
         return 0;
+    }
+
+    @Override
+    public User findByCPF(String cpf) {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+
+        try {
+            String sql = "SELECT * FROM users WHERE cpf = ?";
+
+            stmt = conn.prepareStatement(sql);
+            stmt.setString(1, cpf);
+            rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                User user = new User();
+                user.setId(rs.getInt("id"));
+                user.setCpf(rs.getString("cpf"));
+                user.setPassword(rs.getString("password"));
+                return user;
+            }
+
+            return null;
+
+        } catch (SQLException e) {
+            throw new DbException(e.getMessage());
+        } finally {
+            DB.closeStatement(stmt);
+            DB.closeResultSet(rs);
+        }
+
     }
 }

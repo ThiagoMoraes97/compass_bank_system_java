@@ -14,6 +14,9 @@ public class User {
 
     List<Account> accounts;
 
+    public User() {
+    }
+
     public User(String name, LocalDate birthDate, String cpf, String phone, String password) {
         this.name = name;
         this.birthDate = birthDate;

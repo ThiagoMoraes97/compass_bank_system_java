@@ -10,6 +10,9 @@ public class Account {
 
     private User user;
 
+    public Account() {
+    }
+
     public Account(AccountType accountType, User user) {
         this.accountType = accountType;
         this.balance = 0.00;
