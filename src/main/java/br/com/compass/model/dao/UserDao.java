@@ -4,5 +4,5 @@ import br.com.compass.model.entities.User;
 
 public interface UserDao {
 
-    void insert(User user);
+    int insert(User user);
 }

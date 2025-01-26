@@ -8,21 +8,20 @@ import java.sql.*;
 
 public class UserDaoJDBC implements UserDao {
 
-    private Connection conn = null;
+    private final Connection conn;
 
     public UserDaoJDBC(Connection conn) {
         this.conn = conn;
     }
 
     @Override
-    public void insert(User user) {
+    public int insert(User user) {
         PreparedStatement stmt = null;
         ResultSet rs = null;
 
         try {
             String sql = "INSERT INTO users (name, birth_date, cpf, phone, password) VALUES (?, ?, ?, ?, ?)";
 
-            conn = DB.getConnection();
             stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 
             // Set the parameters from the User object
@@ -39,13 +38,9 @@ public class UserDaoJDBC implements UserDao {
                 // Retrieve the generated key (ID)
                 rs = stmt.getGeneratedKeys();
                 if (rs.next()) {
-                    int id = rs.getInt(1);
-                    user.setId(id);
+                    return rs.getInt(1);
                 }
-            } else {
-                System.out.println("No rows affected. User insertion failed.");
             }
-
 
         } catch (SQLException e) {
             e.printStackTrace();
@@ -58,5 +53,6 @@ public class UserDaoJDBC implements UserDao {
                 e.printStackTrace();
             }
         }
+        return 0;
     }
 }

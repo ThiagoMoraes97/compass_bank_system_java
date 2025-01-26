@@ -39,7 +39,8 @@ public class App {
                     bankMenu(scanner);
                     return;
                 case 2:
-                    // ToDo...
+                    UserService userService = new UserService();
+                    userService.createUser(scanner);
                     System.out.println("Account Opening.");
                     break;
                 case 0:
