@@ -110,4 +110,21 @@ public class AccountService {
 
     };
 
+    public void viewBalance(Scanner sc, User user) {
+        System.out.println("========= View balance =========");
+        System.out.print("Enter the account type you want to view the balance (e.g., Checking, Payroll or Savings): ");
+        AccountType accountType = AccountType.valueOf(sc.nextLine().toUpperCase());
+
+        while(true) {
+            for (Account account : user.getAccounts()) {
+                if (account.getAccountType().toString().contains(accountType.toString())) {
+                    System.out.println("The balance of your " + accountType.toString().toLowerCase() + " account is: R$" + String.format("%.2f", account.getBalance()));
+                    return;
+                }
+            }
+            System.out.println("User don't have an account of the specified type. Choose another type. (e.g., Checking, Payroll or Savings) ");
+            accountType = AccountType.valueOf(sc.nextLine().toUpperCase());
+        }
+    }
+
 }

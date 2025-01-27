@@ -84,7 +84,7 @@ public class App {
                     System.out.println("Withdraw.");
                     break;
                 case 3:
-                    // ToDo...
+                    accountService.viewBalance(scanner, user);
                     System.out.println("Check Balance.");
                     break;
                 case 4:
