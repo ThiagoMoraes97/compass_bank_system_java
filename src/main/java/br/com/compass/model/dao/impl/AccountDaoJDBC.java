@@ -4,42 +4,69 @@ import br.com.compass.db.DB;
 import br.com.compass.db.DbException;
 import br.com.compass.model.dao.AccountDao;
 import br.com.compass.model.entities.Account;
+import br.com.compass.model.entities.User;
+import br.com.compass.model.entities.enums.AccountType;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class AccountDaoJDBC implements AccountDao {
 
     private final Connection conn;
+    PreparedStatement stmt = null;
 
     public AccountDaoJDBC(Connection conn) {
         this.conn = conn;
     }
 
     @Override
-    public int insert(Account account) {
-        PreparedStatement stmt = null;
+    public void insert(AccountType accountType, Integer user_id) {
+
+        try {
+            String sql = "INSERT INTO accounts (user_id, account_type) VALUES (?, ?)";
+
+            stmt = conn.prepareStatement(sql);
+
+            // Set the parameters from the User object
+            stmt.setInt(1, user_id);
+            stmt.setString(2, accountType.name().toUpperCase());
+
+            // Execute the query
+            stmt.executeUpdate();
+
+        } catch (SQLException e) {
+            throw new DbException(e.getMessage());
+        } finally {
+            DB.closeStatement(stmt);
+        }
+    }
+
+    @Override
+    public List<Account> findByUserId(Integer user_id) {
         ResultSet rs = null;
 
         try {
-            String sql = "INSERT INTO accounts (user_id, account_type, balance) VALUES (?, ?, ?)";
+            String sql = "SELECT * FROM accounts WHERE user_id = ?";
 
-            stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            stmt = conn.prepareStatement(sql);
+            stmt.setString(1, user_id.toString());
+            rs = stmt.executeQuery();
 
-            // Set the parameters from the User object
-            stmt.setInt(1, account.getUser().getId());
-            stmt.setString(2, account.getAccountType().name());
-            stmt.setDouble(3, account.getBalance());
+            List<Account> accounts = new ArrayList<>();
 
-            // Execute the query
-            int rowsAffected = stmt.executeUpdate();
-
-            if (rowsAffected > 0) {
-                // Retrieve the generated key (ID)
-                rs = stmt.getGeneratedKeys();
-                if (rs.next()) {
-                    return rs.getInt(1);
-                }
+            while (rs.next()) {
+                Account account = new Account();
+                account.setId(rs.getInt("id"));
+                account.setAccountType(AccountType.valueOf(rs.getString("account_type")));
+                accounts.add(account);
             }
+
+            if (accounts.isEmpty()) {
+                return null;
+            }
+
+            return accounts;
 
         } catch (SQLException e) {
             throw new DbException(e.getMessage());
@@ -47,7 +74,6 @@ public class AccountDaoJDBC implements AccountDao {
             DB.closeStatement(stmt);
             DB.closeResultSet(rs);
         }
-        return 0;
     }
 
 }

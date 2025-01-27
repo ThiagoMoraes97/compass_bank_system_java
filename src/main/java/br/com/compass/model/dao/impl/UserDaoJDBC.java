@@ -6,6 +6,7 @@ import br.com.compass.model.dao.UserDao;
 import br.com.compass.model.entities.User;
 
 import java.sql.*;
+import java.time.LocalDate;
 
 public class UserDaoJDBC implements UserDao {
 
@@ -16,7 +17,7 @@ public class UserDaoJDBC implements UserDao {
     }
 
     @Override
-    public int insert(User user) {
+    public int insert(String name, LocalDate dateOfBirth, String cpf, String phone, String password) {
         PreparedStatement stmt = null;
         ResultSet rs = null;
 
@@ -26,11 +27,11 @@ public class UserDaoJDBC implements UserDao {
             stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 
             // Set the parameters from the User object
-            stmt.setString(1, user.getName());
-            stmt.setDate(2, Date.valueOf(user.getBirthDate())); // Assuming birthDate is a LocalDate
-            stmt.setString(3, user.getCpf());
-            stmt.setString(4, user.getPhone());
-            stmt.setString(5, user.getPassword());
+            stmt.setString(1, name);
+            stmt.setDate(2, Date.valueOf(dateOfBirth)); // Assuming birthDate is a LocalDate
+            stmt.setString(3, cpf);
+            stmt.setString(4, phone);
+            stmt.setString(5, password);
 
             // Execute the query
             int rowsAffected = stmt.executeUpdate();

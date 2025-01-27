@@ -1,5 +1,6 @@
 package br.com.compass;
 
+import br.com.compass.model.services.AccountService;
 import br.com.compass.model.services.UserService;
 import java.util.Scanner;
 
@@ -16,6 +17,7 @@ public class App {
 
    public static void mainMenu(Scanner scanner) {
         UserService userService = new UserService();
+       AccountService accountService = new AccountService();
         boolean running = true;
 
         while (running) {
@@ -35,9 +37,10 @@ public class App {
                     bankMenu(scanner);
                     return;
                 case 2:
-                    userService.createUser(scanner);
+                    accountService.createAccount(scanner);
                     System.out.println("Account Opening.");
                     userService.loginUser(scanner);
+                    bankMenu(scanner);
                     break;
                 case 0:
                     running = false;
