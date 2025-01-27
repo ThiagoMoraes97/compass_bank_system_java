@@ -40,7 +40,7 @@ public class UserService {
         System.out.println("User and Account created successfully");
     };
 
-    public void loginUser(Scanner sc) {
+    public User loginUser(Scanner sc) {
         System.out.println("========= Account Login =========");
         System.out.print("Enter your CPF: ");
         String cpf = sc.nextLine();
@@ -48,6 +48,14 @@ public class UserService {
         String password = sc.nextLine();
 
         User user = userDao.findByCPF(cpf);
+        System.out.println(user.getId());
+        System.out.println(user.getCpf());
+        System.out.println(user.getName());
+        System.out.println(user.getPassword());
+        System.out.println(user.getBirthDate());
+        for (Account accounts : user.getAccounts()) {
+            System.out.println(accounts.getAccountType());
+        }
 
         if (user == null) {
             throw new DbException("User or password is incorrect");
@@ -58,5 +66,8 @@ public class UserService {
         } else {
             throw new DbException("User or password is incorrect");
         }
+
+        return user;
+
     }
 }

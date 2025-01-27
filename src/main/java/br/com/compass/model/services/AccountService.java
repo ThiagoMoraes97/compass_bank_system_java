@@ -8,6 +8,7 @@ import br.com.compass.model.entities.User;
 import br.com.compass.model.entities.enums.AccountType;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Scanner;
 
 public class AccountService {
@@ -44,4 +45,30 @@ public class AccountService {
 
         System.out.println("Account has been created.");
     }
+
+    public void deposit(Scanner sc, User user) {
+        sc.useLocale(Locale.US);
+
+        System.out.println("========= Deposit =========");
+        System.out.print("Enter the amount you want to deposit: ");
+        Double amount = sc.nextDouble();
+        sc.nextLine();
+        System.out.println("Enter the account type (e.g., Checking, Payroll or Savings): ");
+        AccountType accountType = AccountType.valueOf(sc.nextLine().toUpperCase());
+
+        while(true) {
+            for (Account account : user.getAccounts()) {
+                if (account.getAccountType().toString().contains(accountType.toString())) {
+                    account.deposit(amount);
+                    accountDao.deposit(user.getId(), accountType, amount);
+                    System.out.println("Deposit successful. New balance: " + account.getBalance());
+                    return;
+                }
+            }
+            System.out.println("User don't have an account of the specified type. Choose another type. (e.g., Checking, Payroll or Savings) ");
+            accountType = AccountType.valueOf(sc.nextLine().toUpperCase());
+        }
+
+    };
+
 }

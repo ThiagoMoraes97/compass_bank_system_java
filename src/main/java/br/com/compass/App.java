@@ -1,13 +1,21 @@
 package br.com.compass;
 
+import br.com.compass.model.entities.User;
 import br.com.compass.model.services.AccountService;
 import br.com.compass.model.services.UserService;
+
+import java.util.Locale;
 import java.util.Scanner;
 
 public class App {
-    
+
+    static User user = null;
+    static UserService userService = new UserService();
+    static AccountService accountService = new AccountService();
+
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
+        Locale.setDefault(Locale.US);
 
         mainMenu(scanner);
         
@@ -16,8 +24,6 @@ public class App {
     }
 
    public static void mainMenu(Scanner scanner) {
-        UserService userService = new UserService();
-       AccountService accountService = new AccountService();
         boolean running = true;
 
         while (running) {
@@ -33,13 +39,13 @@ public class App {
 
             switch (option) {
                 case 1:
-                    userService.loginUser(scanner);
+                    user = userService.loginUser(scanner);
                     bankMenu(scanner);
                     return;
                 case 2:
                     accountService.createAccount(scanner);
                     System.out.println("Account Opening.");
-                    userService.loginUser(scanner);
+                    user = userService.loginUser(scanner);
                     bankMenu(scanner);
                     break;
                 case 0:
@@ -66,10 +72,11 @@ public class App {
             System.out.print("Choose an option: ");
 
             int option = scanner.nextInt();
+            scanner.nextLine();
 
             switch (option) {
                 case 1:
-                    // ToDo...
+                    accountService.deposit(scanner, user);
                     System.out.println("Deposit.");
                     break;
                 case 2:

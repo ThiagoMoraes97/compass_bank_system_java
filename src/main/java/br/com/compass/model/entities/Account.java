@@ -11,9 +11,11 @@ public class Account {
     private User user;
 
     public Account() {
+        this.balance = 0.00;
     }
 
-    public Account(AccountType accountType, User user) {
+    public Account(int id, AccountType accountType, User user) {
+        this.id = id;
         this.accountType = accountType;
         this.balance = 0.00;
         this.user = user;
@@ -49,5 +51,13 @@ public class Account {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public void deposit(double amount) {
+        this.balance += amount;
+    }
+
+    public void withdraw(double amount) {
+        this.balance -= amount;
     }
 }

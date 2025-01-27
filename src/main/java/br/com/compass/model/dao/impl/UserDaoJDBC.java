@@ -3,10 +3,14 @@ package br.com.compass.model.dao.impl;
 import br.com.compass.db.DB;
 import br.com.compass.db.DbException;
 import br.com.compass.model.dao.UserDao;
+import br.com.compass.model.entities.Account;
 import br.com.compass.model.entities.User;
+import br.com.compass.model.entities.enums.AccountType;
 
 import java.sql.*;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 public class UserDaoJDBC implements UserDao {
 
@@ -59,28 +63,49 @@ public class UserDaoJDBC implements UserDao {
         ResultSet rs = null;
 
         try {
-            String sql = "SELECT * FROM users WHERE cpf = ?";
+            String sql = "SELECT users.*, accounts.account_type, accounts.id AS account_id " +
+                    "FROM users " +
+                    "LEFT JOIN accounts ON users.id = accounts.user_id " +
+                    "WHERE users.cpf = ?";
 
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, cpf);
             rs = stmt.executeQuery();
 
-            if (rs.next()) {
-                User user = new User();
-                user.setId(rs.getInt("id"));
-                user.setCpf(rs.getString("cpf"));
-                user.setPassword(rs.getString("password"));
-                return user;
+            User user = null;
+
+            while (rs.next()) {
+                if (user == null) {
+                    user = new User();
+                    user.setId(rs.getInt("id"));
+                    user.setName(rs.getString("name"));
+                    Date sqlDate = rs.getDate("birth_date");
+                    if (sqlDate != null) {
+                        LocalDate birthDate = sqlDate.toLocalDate();
+                        user.setBirthDate(birthDate);
+                    }
+                    user.setCpf(rs.getString("cpf"));
+                    user.setPhone(rs.getString("phone"));
+                    user.setPassword(rs.getString("password"));
+                }
+
+                String accountTypeString = rs.getString("account_type");
+                if (accountTypeString != null) {
+                    AccountType accountType = AccountType.valueOf(accountTypeString);
+                    Account account = new Account();
+                    account.setId(rs.getInt("account_id"));
+                    account.setAccountType(accountType);
+                    account.setUser(user);
+                    user.addAccount(account);
+                }
             }
 
-            return null;
-
+            return user;
         } catch (SQLException e) {
             throw new DbException(e.getMessage());
         } finally {
             DB.closeStatement(stmt);
             DB.closeResultSet(rs);
         }
-
     }
 }

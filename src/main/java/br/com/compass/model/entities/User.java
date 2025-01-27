@@ -1,6 +1,7 @@
 package br.com.compass.model.entities;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 public class User {
@@ -12,12 +13,13 @@ public class User {
     private String phone;
     private String password;
 
-    List<Account> accounts;
+    private final List<Account> accounts = new ArrayList<>();
 
     public User() {
     }
 
-    public User(String name, LocalDate birthDate, String cpf, String phone, String password) {
+    public User(int id, String name, LocalDate birthDate, String cpf, String phone, String password) {
+        this.id = id;
         this.name = name;
         this.birthDate = birthDate;
         this.cpf = cpf;
@@ -72,4 +74,17 @@ public class User {
     public void setPassword(String password) {
         this.password = password;
     }
+
+    public List<Account> getAccounts() {
+        return accounts;
+    }
+
+    public void addAccount(Account account) {
+        this.accounts.add(account);
+    }
+
+    public void removeAccount(Account account) {
+        this.accounts.remove(account);
+    }
+
 }
