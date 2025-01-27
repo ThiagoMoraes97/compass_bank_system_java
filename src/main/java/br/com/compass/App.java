@@ -80,7 +80,7 @@ public class App {
                     System.out.println("Deposit.");
                     break;
                 case 2:
-                    // ToDo...
+                    accountService.withdraw(scanner, user);
                     System.out.println("Withdraw.");
                     break;
                 case 3:

@@ -1,20 +1,23 @@
 package br.com.compass.model.services;
 
+import br.com.compass.db.DbException;
 import br.com.compass.model.dao.AccountDao;
 import br.com.compass.model.dao.DaoFactory;
+import br.com.compass.model.dao.TransactionDao;
 import br.com.compass.model.dao.UserDao;
 import br.com.compass.model.entities.Account;
 import br.com.compass.model.entities.User;
 import br.com.compass.model.entities.enums.AccountType;
+import br.com.compass.model.entities.enums.TransactionType;
 
 import java.util.List;
 import java.util.Locale;
 import java.util.Scanner;
 
 public class AccountService {
-
     UserDao userDao = DaoFactory.createUserDao();
     AccountDao accountDao = DaoFactory.createAccountDao();
+    TransactionDao transactionDao = DaoFactory.createTransactionDao();
     UserService userService = new UserService();
 
     public void createAccount(Scanner sc) {
@@ -56,13 +59,49 @@ public class AccountService {
         System.out.println("Enter the account type (e.g., Checking, Payroll or Savings): ");
         AccountType accountType = AccountType.valueOf(sc.nextLine().toUpperCase());
 
+        TransactionType transactionType = TransactionType.DEPOSIT;
+
         while(true) {
             for (Account account : user.getAccounts()) {
                 if (account.getAccountType().toString().contains(accountType.toString())) {
                     account.deposit(amount);
                     accountDao.deposit(user.getId(), accountType, amount);
                     System.out.println("Deposit successful. New balance: " + account.getBalance());
+                    transactionDao.saveTransaction(user.getId(), account.getId(), transactionType, amount);
                     return;
+                }
+            }
+            System.out.println("User don't have an account of the specified type. Choose another type. (e.g., Checking, Payroll or Savings) ");
+            accountType = AccountType.valueOf(sc.nextLine().toUpperCase());
+        }
+
+    };
+
+    public void withdraw(Scanner sc, User user) {
+        sc.useLocale(Locale.US);
+
+        System.out.println("========= Withdraw =========");
+        System.out.print("Enter the amount you want to withdraw: ");
+        Double amount = sc.nextDouble();
+        sc.nextLine();
+        System.out.println("Enter the account type (e.g., Checking, Payroll or Savings): ");
+        AccountType accountType = AccountType.valueOf(sc.nextLine().toUpperCase());
+
+        TransactionType transactionType = TransactionType.WITHDRAW;
+
+        while(true) {
+            for (Account account : user.getAccounts()) {
+                if (account.getAccountType().toString().contains(accountType.toString())) {
+                    try{
+                        account.withdraw(amount);
+                        accountDao.withdraw(user.getId(), accountType, amount);
+                        System.out.println("Withdraw successful. New balance: " + account.getBalance());
+                        transactionDao.saveTransaction(user.getId(), account.getId(), transactionType, amount);
+                        return;
+                    } catch (DbException e){
+                        System.out.println(e.getMessage());
+                        return;
+                    }
                 }
             }
             System.out.println("User don't have an account of the specified type. Choose another type. (e.g., Checking, Payroll or Savings) ");

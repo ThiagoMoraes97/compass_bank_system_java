@@ -95,7 +95,7 @@ public class DB {
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 user_id INT NOT NULL,
                 account_id INT NOT NULL,
-                transaction_type ENUM('DEPOSIT', 'WITHDRAWAL', 'TRANSFER') NOT NULL,
+                transaction_type ENUM('DEPOSIT', 'WITHDRAW', 'TRANSFER') NOT NULL,
                 amount DECIMAL(15,2) NOT NULL,
                 transaction_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 destination_account_id INT,

@@ -1,5 +1,6 @@
 package br.com.compass.model.entities;
 
+import br.com.compass.db.DbException;
 import br.com.compass.model.entities.enums.AccountType;
 
 public class Account {
@@ -54,10 +55,18 @@ public class Account {
     }
 
     public void deposit(double amount) {
-        this.balance += amount;
+        setBalance(getBalance() + amount);
     }
 
     public void withdraw(double amount) {
-        this.balance -= amount;
+        if (amount <= 0) {
+            throw new IllegalArgumentException("Withdrawal amount must be greater than zero.");
+        }
+
+        if (getBalance() < amount) {
+            throw new DbException("Insufficient balance to perform the withdrawal.");
+        }
+
+         setBalance(getBalance() - amount);
     }
 }

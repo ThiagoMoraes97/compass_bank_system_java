@@ -48,14 +48,6 @@ public class UserService {
         String password = sc.nextLine();
 
         User user = userDao.findByCPF(cpf);
-        System.out.println(user.getId());
-        System.out.println(user.getCpf());
-        System.out.println(user.getName());
-        System.out.println(user.getPassword());
-        System.out.println(user.getBirthDate());
-        for (Account accounts : user.getAccounts()) {
-            System.out.println(accounts.getAccountType());
-        }
 
         if (user == null) {
             throw new DbException("User or password is incorrect");

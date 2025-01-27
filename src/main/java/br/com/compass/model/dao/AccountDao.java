@@ -10,4 +10,5 @@ public interface AccountDao {
     void insert(AccountType accountType, Integer user_id);
     List<Account> findByUserId(Integer user_id);
     void deposit(Integer user_id, AccountType accountType, Double balance);
+    void withdraw(Integer user_id, AccountType accountType, Double balance);
 }

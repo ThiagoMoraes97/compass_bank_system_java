@@ -100,4 +100,29 @@ public class AccountDaoJDBC implements AccountDao {
         }
     }
 
+    @Override
+    public void withdraw(Integer user_id, AccountType accountType, Double balance) {
+
+        if (user_id == null || accountType == null || balance == null || balance <= 0) {
+            throw new IllegalArgumentException("Invalid input: user_id, accountType, and amount must be valid and amount > 0.");
+        }
+
+        try{
+            String sql = "UPDATE accounts SET balance = balance - ? WHERE user_id = ? AND account_type = ?";
+
+            stmt = conn.prepareStatement(sql);
+
+            stmt.setDouble(1, balance);
+            stmt.setInt(2, user_id);
+            stmt.setString(3, accountType.name());
+
+            stmt.executeUpdate();
+
+        } catch (SQLException e) {
+            throw new DbException(e.getMessage());
+        } finally {
+            DB.closeStatement(stmt);
+        }
+    }
+
 }

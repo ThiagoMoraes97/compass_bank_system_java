@@ -63,7 +63,7 @@ public class UserDaoJDBC implements UserDao {
         ResultSet rs = null;
 
         try {
-            String sql = "SELECT users.*, accounts.account_type, accounts.id AS account_id " +
+            String sql = "SELECT users.*, accounts.account_type, accounts.id AS account_id, accounts.balance AS account_balance " +
                     "FROM users " +
                     "LEFT JOIN accounts ON users.id = accounts.user_id " +
                     "WHERE users.cpf = ?";
@@ -96,6 +96,7 @@ public class UserDaoJDBC implements UserDao {
                     account.setId(rs.getInt("account_id"));
                     account.setAccountType(accountType);
                     account.setUser(user);
+                    account.setBalance(rs.getDouble("account_balance"));
                     user.addAccount(account);
                 }
             }
