@@ -6,6 +6,7 @@ import br.com.compass.model.dao.AccountDao;
 import br.com.compass.model.entities.Account;
 import br.com.compass.model.entities.enums.AccountType;
 
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -75,6 +76,7 @@ public class AccountDaoJDBC implements AccountDao {
         }
     }
 
+
     @Override
     public void deposit(Integer user_id, AccountType accountType, Double balance) {
 
@@ -125,4 +127,6 @@ public class AccountDaoJDBC implements AccountDao {
         }
     }
 
-}
+};
+
+

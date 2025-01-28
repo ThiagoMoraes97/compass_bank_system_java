@@ -1,6 +1,8 @@
 package br.com.compass.model.dao;
 
 import br.com.compass.model.entities.Account;
+import br.com.compass.model.entities.Transaction;
+import br.com.compass.model.entities.User;
 import br.com.compass.model.entities.enums.AccountType;
 
 import java.util.List;
@@ -11,4 +13,5 @@ public interface AccountDao {
     List<Account> findByUserId(Integer user_id);
     void deposit(Integer user_id, AccountType accountType, Double balance);
     void withdraw(Integer user_id, AccountType accountType, Double balance);
+
 }

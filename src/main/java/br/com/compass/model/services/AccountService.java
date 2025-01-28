@@ -6,6 +6,7 @@ import br.com.compass.model.dao.DaoFactory;
 import br.com.compass.model.dao.TransactionDao;
 import br.com.compass.model.dao.UserDao;
 import br.com.compass.model.entities.Account;
+import br.com.compass.model.entities.Transaction;
 import br.com.compass.model.entities.User;
 import br.com.compass.model.entities.enums.AccountType;
 import br.com.compass.model.entities.enums.TransactionType;
@@ -126,5 +127,21 @@ public class AccountService {
             accountType = AccountType.valueOf(sc.nextLine().toUpperCase());
         }
     }
+
+    public void viewStatement(User user) {
+        System.out.println("============= Account Statement ==============");
+
+        List<Transaction> allTransactions = transactionDao.listAllTransactions(user);
+        System.out.println(
+                "+------------+------------+------------------+");
+        System.out.println(
+                "| Type       | Amount     | Date             |");
+        System.out.println(
+                "+------------+------------+------------------+");
+        for (Transaction transaction : allTransactions) {
+            System.out.println(transaction);
+        }
+        System.out.println("==============================================");
+    };
 
 }

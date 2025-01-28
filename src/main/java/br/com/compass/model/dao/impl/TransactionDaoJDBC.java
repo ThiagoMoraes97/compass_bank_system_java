@@ -3,20 +3,27 @@ package br.com.compass.model.dao.impl;
 import br.com.compass.model.dao.AccountDao;
 import br.com.compass.model.dao.DaoFactory;
 import br.com.compass.model.dao.TransactionDao;
+import br.com.compass.model.dao.UserDao;
+import br.com.compass.model.entities.Transaction;
+import br.com.compass.model.entities.User;
 import br.com.compass.model.entities.enums.AccountType;
 import br.com.compass.model.entities.enums.TransactionType;
 
 import br.com.compass.db.DB;
 import br.com.compass.db.DbException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+
+import java.sql.*;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 public class TransactionDaoJDBC implements TransactionDao {
 
     private final Connection conn;
     PreparedStatement stmt = null;
     AccountDao accountDao = DaoFactory.createAccountDao();
+    UserDao userDao = DaoFactory.createUserDao();
 
     public TransactionDaoJDBC(Connection conn) {
         this.conn = conn;
@@ -47,6 +54,7 @@ public class TransactionDaoJDBC implements TransactionDao {
         String sql = "INSERT INTO transactions (user_id, account_id, transaction_type, amount, destination_account_id) VALUES (?, ?, ?, ?, ?)";
 
         try{
+
             stmt = conn.prepareStatement(sql);
             stmt.setInt(1, user_id);
             stmt.setInt(2, account_id);
@@ -55,6 +63,10 @@ public class TransactionDaoJDBC implements TransactionDao {
             stmt.setInt(5, destination_account_id);
 
             stmt.executeUpdate();
+
+            if (!conn.getAutoCommit()) {
+                conn.commit();
+            }
 
         } catch (SQLException e) {
             throw new DbException(e.getMessage());
@@ -81,4 +93,44 @@ public class TransactionDaoJDBC implements TransactionDao {
             }
         }
     };
+
+    @Override
+    public List<Transaction> listAllTransactions(User user){
+        ResultSet rs = null;
+        try {
+            String sql = "SELECT * FROM transactions WHERE user_id = ? ORDER BY transaction_date ASC;";
+
+            stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, user.getId());
+            rs = stmt.executeQuery();
+
+            List<Transaction> transactions = new ArrayList<>();
+
+
+            while (rs.next()) {
+                Transaction transaction = new Transaction();
+                transaction.setId(rs.getInt("id"));
+                transaction.setTransactionType(TransactionType.valueOf(rs.getString("transaction_type")));
+                transaction.setAmount(rs.getDouble("amount"));
+                Date sqlDate = rs.getDate("transaction_date");
+                if (sqlDate != null) {
+                    LocalDate transactionDate = sqlDate.toLocalDate();
+                    transaction.setTimestamp(transactionDate);
+                }
+                transactions.add(transaction);
+            }
+
+            if (transactions.isEmpty()) {
+                return null;
+            }
+
+            return transactions;
+
+        } catch (SQLException e) {
+            throw new DbException(e.getMessage());
+        } finally {
+            DB.closeStatement(stmt);
+            DB.closeResultSet(rs);
+        }
+    }
 }

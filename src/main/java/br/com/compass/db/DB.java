@@ -99,9 +99,9 @@ public class DB {
                 amount DECIMAL(15,2) NOT NULL,
                 transaction_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 destination_account_id INT,
-                FOREIGN KEY (account_id) REFERENCES Accounts(id),
-                FOREIGN KEY (destination_account_id) REFERENCES Accounts(id),
-                FOREIGN KEY (user_id) REFERENCES Users(id)
+                FOREIGN KEY (account_id) REFERENCES accounts(id),
+                FOREIGN KEY (destination_account_id) REFERENCES accounts(id),
+                FOREIGN KEY (user_id) REFERENCES users(id)
             );
         """;
 

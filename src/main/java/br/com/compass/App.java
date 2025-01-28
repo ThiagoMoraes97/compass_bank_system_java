@@ -94,13 +94,13 @@ public class App {
                     System.out.println("Transfer.");
                     break;
                 case 5:
-                    // ToDo...
+                    accountService.viewStatement(user);
                     System.out.println("Bank Statement.");
                     break;
                 case 0:
-                    // ToDo...
                     System.out.println("Exiting...");
                     running = false;
+                    mainMenu(scanner);
                     return;
                 default:
                     System.out.println("Invalid option! Please try again.");

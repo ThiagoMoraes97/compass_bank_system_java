@@ -1,7 +1,6 @@
 package br.com.compass.model.services;
 
 import br.com.compass.db.DbException;
-import br.com.compass.model.dao.AccountDao;
 import br.com.compass.model.dao.DaoFactory;
 import br.com.compass.model.dao.TransactionDao;
 import br.com.compass.model.dao.UserDao;
