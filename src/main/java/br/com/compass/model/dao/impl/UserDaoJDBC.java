@@ -23,23 +23,26 @@ public class UserDaoJDBC implements UserDao {
     @Override
     public int insert(String name, LocalDate dateOfBirth, String cpf, String phone, String password) {
 
-        try {
-            String sql = "INSERT INTO users (name, birth_date, cpf, phone, password) VALUES (?, ?, ?, ?, ?)";
+        if (name == null || dateOfBirth == null || cpf == null || phone == null || password == null) {
+            throw new IllegalArgumentException("All parameters must be non-null.");
+        }
 
+        String sql = "INSERT INTO users (name, birth_date, cpf, phone, password) VALUES (?, ?, ?, ?, ?)";
+
+        try {
             stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 
-            // Set the parameters from the User object
+
             stmt.setString(1, name);
             stmt.setDate(2, Date.valueOf(dateOfBirth)); // Assuming birthDate is a LocalDate
             stmt.setString(3, cpf);
             stmt.setString(4, phone);
             stmt.setString(5, password);
 
-            // Execute the query
+
             int rowsAffected = stmt.executeUpdate();
 
             if (rowsAffected > 0) {
-                // Retrieve the generated key (ID)
                 rs = stmt.getGeneratedKeys();
                 if (rs.next()) {
                     return rs.getInt(1);
@@ -47,16 +50,21 @@ public class UserDaoJDBC implements UserDao {
             }
 
         } catch (SQLException e) {
-            throw new DbException(e.getMessage());
+            throw new DbException("Unable to insert user into the database. Please try again later.");
         } finally {
             DB.closeStatement(stmt);
             DB.closeResultSet(rs);
         }
+
         return 0;
     }
 
     @Override
     public User findByCPF(String cpf) {
+
+        if (cpf == null || cpf.isEmpty()) {
+            throw new IllegalArgumentException("CPF must not be null or empty.");
+        }
 
         try {
             String sql = "SELECT users.*, accounts.account_type, accounts.id AS account_id, accounts.balance AS account_balance " +
@@ -98,8 +106,9 @@ public class UserDaoJDBC implements UserDao {
             }
 
             return user;
+
         } catch (SQLException e) {
-            throw new DbException(e.getMessage());
+            throw new DbException("Unable to find user with the provided CPF. Please try again later.");
         } finally {
             DB.closeStatement(stmt);
             DB.closeResultSet(rs);

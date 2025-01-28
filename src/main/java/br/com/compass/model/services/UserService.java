@@ -21,44 +21,115 @@ public class UserService {
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
-        System.out.print("Enter your full name: ");
-        String name = sc.nextLine();
-        System.out.print("Enter your password: ");
-        String password = sc.nextLine();
-        System.out.print("Enter your date of birth (e.g., DD/MM/YYYY): ");
-        LocalDate dateOfBirth = LocalDate.parse(sc.nextLine(), formatter);
-        System.out.print("Enter your phone number (e.g., 11 99999-9999): ");
-        String phone = sc.nextLine();
+        try {
+            System.out.print("Enter your full name: ");
+            String name = sc.nextLine().trim();
+            if (name.isEmpty()) {
+                throw new IllegalArgumentException("Name cannot be empty.");
+            }
 
-        System.out.print("Enter your account type (e.g., Checking or Payroll or Savings): ");
-        AccountType accountType = AccountType.valueOf(sc.nextLine().toUpperCase());
+            System.out.print("Enter your password: ");
+            String password = sc.nextLine().trim();
+            validatePassword(password);
 
-        int user_id = userDao.insert(name, dateOfBirth, cpf, phone, password);
-        accountDao.insert(accountType, user_id);
+            System.out.print("Enter your date of birth (e.g., DD/MM/YYYY): ");
+            LocalDate dateOfBirth;
+            try {
+                dateOfBirth = LocalDate.parse(sc.nextLine(), formatter);
+            } catch (Exception e) {
+                throw new IllegalArgumentException("Invalid date format. Please use DD/MM/YYYY.");
+            }
 
-        System.out.println("User and Account created successfully");
+            System.out.print("Enter your phone number (e.g., (11) 99999-9999): ");
+            String phone = sc.nextLine().trim();
+            if (phone.isEmpty()) {
+                throw new IllegalArgumentException("Phone number cannot be empty.");
+            }
+            if (!phone.matches("\\(\\d{2}\\) \\d{5}-\\d{4}")) {
+                throw new IllegalArgumentException("Phone number must be in the format (XX) XXXXX-XXXX.");
+            }
+
+            System.out.print("Enter your account type (e.g., Checking or Payroll or Savings): ");
+            AccountType accountType;
+            try {
+                accountType = AccountType.valueOf(sc.nextLine().toUpperCase());
+            } catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException("Invalid account type. Accepted values are: Checking, Payroll, Savings.");
+            }
+
+            int user_id = userDao.insert(name, dateOfBirth, cpf, phone, password);
+            accountDao.insert(accountType, user_id);
+
+            System.out.println("User and Account created successfully");
+
+        } catch (IllegalArgumentException e) {
+            System.err.println("Input error: " + e.getMessage());
+        } catch (DbException e) {
+            System.err.println("Database error: " + e.getMessage());
+        } catch (Exception e) {
+            System.err.println("An unexpected error occurred: " + e.getMessage());
+        }
     };
 
     public User loginUser(Scanner sc) {
         System.out.println("========= Account Login =========");
-        System.out.print("Enter your CPF: ");
-        String cpf = sc.nextLine();
-        System.out.print("Enter your password: ");
-        String password = sc.nextLine();
 
-        User user = userDao.findByCPF(cpf);
+        try {
+            System.out.print("Enter your CPF: ");
+            String cpf = sc.nextLine().trim();
+            if (cpf.isEmpty()) {
+                throw new IllegalArgumentException("CPF cannot be empty.");
+            }
+            if (cpf.length() != 11 || !cpf.matches("\\d+")) {
+                throw new IllegalArgumentException("CPF must have exactly 11 numeric digits.");
+            }
 
-        if (user == null) {
-            throw new DbException("User or password is incorrect");
+            System.out.print("Enter your password: ");
+            String password = sc.nextLine().trim();
+            validatePassword(password);
+
+            User user = userDao.findByCPF(cpf);
+            if (user == null) {
+                throw new DbException("User or password is incorrect.");
+            }
+
+            if (user.getPassword().equals(password)) {
+                System.out.println("Login successful!");
+            } else {
+                throw new DbException("User or password is incorrect.");
+            }
+
+            return user;
+
+        } catch (IllegalArgumentException e) {
+            System.err.println("Input error: " + e.getMessage());
+            return null;
+        } catch (DbException e) {
+            System.err.println("Authentication error: " + e.getMessage());
+            return null;
+        } catch (Exception e) {
+            System.err.println("An unexpected error occurred: " + e.getMessage());
+            return null;
         }
-
-        if (user.getPassword().equals(password)) {
-            System.out.println("Login successful!");
-        } else {
-            throw new DbException("User or password is incorrect");
-        }
-
-        return user;
 
     }
+
+    public void validatePassword(String password) {
+        if (password.isEmpty()) {
+            throw new IllegalArgumentException("Password cannot be empty.");
+        }
+        if (password.length() < 6) {
+            throw new IllegalArgumentException("Password must have at least 6 characters.");
+        }
+        if (!password.matches(".*[A-Z].*")) {
+            throw new IllegalArgumentException("Password must contain at least one uppercase letter.");
+        }
+        if (!password.matches(".*[a-z].*")) {
+            throw new IllegalArgumentException("Password must contain at least one lowercase letter.");
+        }
+        if (!password.matches(".*[!#].*")) {
+            throw new IllegalArgumentException("Password must contain at least one special character (! or #).");
+        }
+    }
+
 }

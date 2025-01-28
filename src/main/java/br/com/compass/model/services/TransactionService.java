@@ -41,7 +41,12 @@ public class TransactionService {
         Account account = getAccountByType(user, accountType, sc, "origin");
 
         double amount = getTheTranferAmount(sc);
-        processTransfer(user, account, destinationUser, destinationAccount, amount);
+
+        try {
+            processTransfer(user, account, destinationUser, destinationAccount, amount);
+        } catch (DbException e) {
+            System.out.println("Error during transfer: " + e.getMessage());
+        }
     }
 
     private AccountType checkIfAccountTypeExists(Scanner sc, String type) {
@@ -75,7 +80,7 @@ public class TransactionService {
         while (true) {
             try {
                 double amount = sc.nextDouble();
-                sc.nextLine(); // clear buffer
+                sc.nextLine();
                 if (amount > 0) {
                     return amount;
                 } else {
@@ -83,16 +88,23 @@ public class TransactionService {
                 }
             } catch (InputMismatchException e) {
                 System.out.println("Invalid input. Please enter a valid numeric value.");
-                sc.nextLine(); // clear invalid input
+                sc.nextLine();
             }
         }
     }
 
     private void processTransfer(User user, Account account, User destinationUser, Account destinationAccount, double amount) {
+
         TransactionType transactionType = TransactionType.TRANSFER;
-        transactionDao.transferTransaction(user.getId(), account.getAccountType(), amount, destinationUser.getId(), destinationAccount.getAccountType());
-        transactionDao.saveTransferTransaction(user.getId(), account.getId(), transactionType, amount, destinationUser.getId());
-        System.out.println("Transfer successful!");
+
+        try {
+            transactionDao.transferTransaction(user.getId(), account.getAccountType(), amount, destinationUser.getId(), destinationAccount.getAccountType());
+            transactionDao.saveTransferTransaction(user.getId(), account.getId(), transactionType, amount, destinationUser.getId());
+            System.out.println("Transfer successful!");
+        } catch (DbException e) {
+            System.out.println("Error during the transaction: " + e.getMessage());
+            throw e;
+        }
     }
 
 }

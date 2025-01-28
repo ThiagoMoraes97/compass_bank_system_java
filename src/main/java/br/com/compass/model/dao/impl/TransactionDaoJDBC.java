@@ -14,7 +14,6 @@ import br.com.compass.db.DbException;
 
 import java.sql.*;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,9 +30,10 @@ public class TransactionDaoJDBC implements TransactionDao {
 
     @Override
     public void saveTransaction(int user_id, int account_id, TransactionType transactionType, Double amount) {
-        try{
 
-            String sql = "INSERT INTO transactions (user_id, account_id, transaction_type, amount) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO transactions (user_id, account_id, transaction_type, amount) VALUES (?, ?, ?, ?)";
+
+        try{
             stmt = conn.prepareStatement(sql);
             stmt.setInt(1, user_id);
             stmt.setInt(2, account_id);
@@ -43,7 +43,7 @@ public class TransactionDaoJDBC implements TransactionDao {
             stmt.executeUpdate();
 
         } catch (SQLException e) {
-            throw new DbException(e.getMessage());
+            throw new DbException("Error saving transaction: " + e.getMessage());
         } finally {
             DB.closeStatement(stmt);
         }
@@ -51,10 +51,10 @@ public class TransactionDaoJDBC implements TransactionDao {
 
     @Override
     public void saveTransferTransaction(int user_id, int account_id, TransactionType transactionType, Double amount, Integer destination_account_id) {
+
         String sql = "INSERT INTO transactions (user_id, account_id, transaction_type, amount, destination_account_id) VALUES (?, ?, ?, ?, ?)";
 
         try{
-
             stmt = conn.prepareStatement(sql);
             stmt.setInt(1, user_id);
             stmt.setInt(2, account_id);
@@ -69,7 +69,7 @@ public class TransactionDaoJDBC implements TransactionDao {
             }
 
         } catch (SQLException e) {
-            throw new DbException(e.getMessage());
+            throw new DbException("Error saving transfer transaction: " + e.getMessage());
 
         } finally {
             DB.closeStatement(stmt);
@@ -78,6 +78,10 @@ public class TransactionDaoJDBC implements TransactionDao {
 
     @Override
     public void transferTransaction(int user_id, AccountType userAccountType, Double amount, int destination_user_id, AccountType destinationAccountType){
+
+        if (amount == null || amount <= 0) {
+            throw new IllegalArgumentException("Amount must be greater than 0.");
+        }
 
         try{
             conn.setAutoCommit(false);
@@ -88,7 +92,7 @@ public class TransactionDaoJDBC implements TransactionDao {
             try{
                 conn.rollback();
                 throw new DbException("Transaction rolled back! Caused by: " + e.getMessage());
-            } catch ( SQLException e1 ) {
+            } catch ( SQLException rollbackException ) {
                 throw new DbException("Error trying to rollback! Caused by: " + e.getMessage());
             }
         }
@@ -96,10 +100,16 @@ public class TransactionDaoJDBC implements TransactionDao {
 
     @Override
     public List<Transaction> listAllTransactions(User user){
-        ResultSet rs = null;
-        try {
-            String sql = "SELECT * FROM transactions WHERE user_id = ? ORDER BY transaction_date ASC;";
 
+        if (user == null) {
+            throw new IllegalArgumentException("It is necessary to inform the user.");
+        }
+
+        ResultSet rs = null;
+
+        String sql = "SELECT * FROM transactions WHERE user_id = ? ORDER BY transaction_date ASC;";
+
+        try {
             stmt = conn.prepareStatement(sql);
             stmt.setInt(1, user.getId());
             rs = stmt.executeQuery();
@@ -112,6 +122,7 @@ public class TransactionDaoJDBC implements TransactionDao {
                 transaction.setId(rs.getInt("id"));
                 transaction.setTransactionType(TransactionType.valueOf(rs.getString("transaction_type")));
                 transaction.setAmount(rs.getDouble("amount"));
+
                 Date sqlDate = rs.getDate("transaction_date");
                 if (sqlDate != null) {
                     LocalDate transactionDate = sqlDate.toLocalDate();
@@ -120,14 +131,10 @@ public class TransactionDaoJDBC implements TransactionDao {
                 transactions.add(transaction);
             }
 
-            if (transactions.isEmpty()) {
-                return null;
-            }
-
-            return transactions;
+            return transactions.isEmpty() ? null : transactions;
 
         } catch (SQLException e) {
-            throw new DbException(e.getMessage());
+            throw new DbException("Error listing transactions: " + e.getMessage());
         } finally {
             DB.closeStatement(stmt);
             DB.closeResultSet(rs);

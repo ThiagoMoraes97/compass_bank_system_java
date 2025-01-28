@@ -11,7 +11,7 @@ public class DB {
 
     public static Connection getConnection() {
         try{
-            if (conn == null) {
+            if (conn == null || conn.isClosed()) {
                 Properties props = loadProperties();
                 String url = props.getProperty("dburl");
                 conn = DriverManager.getConnection(url, props);
@@ -20,7 +20,7 @@ public class DB {
             }
         }
         catch (SQLException e) {
-            throw new DbException(e.getMessage());
+            throw new DbException("Error getting connection: " + e.getMessage());
         }
         return conn;
     };
@@ -31,7 +31,7 @@ public class DB {
                 conn.close();
             }
             catch (SQLException e) {
-                throw new DbException(e.getMessage());
+                throw new DbException("Error closing connection: " + e.getMessage());
             }
         }
     }
@@ -43,7 +43,7 @@ public class DB {
             return props;
         }
         catch ( IOException e) {
-            throw new DbException(e.getMessage());
+            throw new DbException("Error loading database properties: " + e.getMessage());
         }
     }
 
@@ -52,7 +52,7 @@ public class DB {
             try{
                 stmt.close();
             } catch (SQLException e) {
-                throw new DbException(e.getMessage());
+                throw new DbException("Error closing statement: " + e.getMessage());
             }
         }
     }
@@ -62,7 +62,7 @@ public class DB {
             try{
                 rs.close();
             } catch (SQLException e) {
-                throw new DbException(e.getMessage());
+                throw new DbException("Error closing ResultSet: " + e.getMessage());
             }
         }
     }

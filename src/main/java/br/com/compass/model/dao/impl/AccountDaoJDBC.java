@@ -23,20 +23,25 @@ public class AccountDaoJDBC implements AccountDao {
     @Override
     public void insert(AccountType accountType, Integer user_id) {
 
-        try {
-            String sql = "INSERT INTO accounts (user_id, account_type) VALUES (?, ?)";
+        if (user_id == null || accountType == null) {
+            throw new IllegalArgumentException("Invalid input: userId and accountType cannot be null.");
+        }
 
+        String sql = "INSERT INTO accounts (user_id, account_type) VALUES (?, ?)";
+
+        try {
             stmt = conn.prepareStatement(sql);
 
-            // Set the parameters from the User object
+
             stmt.setInt(1, user_id);
             stmt.setString(2, accountType.name().toUpperCase());
 
-            // Execute the query
             stmt.executeUpdate();
 
+        } catch (SQLIntegrityConstraintViolationException e) {
+            throw new DbException("Account already exists for the given user and account type.");
         } catch (SQLException e) {
-            throw new DbException(e.getMessage());
+            throw new DbException("Database error: Unable to insert account.");
         } finally {
             DB.closeStatement(stmt);
         }
@@ -44,11 +49,16 @@ public class AccountDaoJDBC implements AccountDao {
 
     @Override
     public List<Account> findByUserId(Integer user_id) {
+
+        if (user_id == null) {
+            throw new IllegalArgumentException("Invalid input: userId cannot be null.");
+        }
+
         ResultSet rs = null;
 
-        try {
-            String sql = "SELECT * FROM accounts WHERE user_id = ?";
+        String sql = "SELECT * FROM accounts WHERE user_id = ?";
 
+        try {
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, user_id.toString());
             rs = stmt.executeQuery();
@@ -69,13 +79,12 @@ public class AccountDaoJDBC implements AccountDao {
             return accounts;
 
         } catch (SQLException e) {
-            throw new DbException(e.getMessage());
+            throw new DbException("Database error: Unable to fetch accounts.");
         } finally {
             DB.closeStatement(stmt);
             DB.closeResultSet(rs);
         }
     }
-
 
     @Override
     public void deposit(Integer user_id, AccountType accountType, Double balance) {
@@ -84,19 +93,22 @@ public class AccountDaoJDBC implements AccountDao {
             throw new IllegalArgumentException("Invalid input: user_id, accountType, and amount must be valid and amount > 0.");
         }
 
-        try{
-            String sql = "UPDATE accounts SET balance = balance + ? WHERE user_id = ? AND account_type = ?";
+        String sql = "UPDATE accounts SET balance = balance + ? WHERE user_id = ? AND account_type = ?";
 
+        try{
             stmt = conn.prepareStatement(sql);
 
             stmt.setDouble(1, balance);
             stmt.setInt(2, user_id);
             stmt.setString(3, accountType.name());
 
-            stmt.executeUpdate();
+            int rowsAffected = stmt.executeUpdate();
+            if (rowsAffected == 0) {
+                throw new DbException("No account found for the given user and account type.");
+            }
 
         } catch (SQLException e) {
-            throw new DbException(e.getMessage());
+            throw new DbException("Database error: Unable to deposit.");
         } finally {
             DB.closeStatement(stmt);
         }
@@ -109,24 +121,28 @@ public class AccountDaoJDBC implements AccountDao {
             throw new IllegalArgumentException("Invalid input: user_id, accountType, and amount must be valid and amount > 0.");
         }
 
-        try{
-            String sql = "UPDATE accounts SET balance = balance - ? WHERE user_id = ? AND account_type = ?";
+        String sql = "UPDATE accounts SET balance = balance - ? WHERE user_id = ? AND account_type = ?";
 
+        try{
             stmt = conn.prepareStatement(sql);
 
             stmt.setDouble(1, balance);
             stmt.setInt(2, user_id);
             stmt.setString(3, accountType.name());
 
-            stmt.executeUpdate();
+            int rowsAffected = stmt.executeUpdate();
+            if (rowsAffected == 0) {
+                throw new DbException("No account found for the given user and account type.");
+            }
 
+        } catch (SQLIntegrityConstraintViolationException e) {
+            throw new DbException("Insufficient balance.");
         } catch (SQLException e) {
-            throw new DbException(e.getMessage());
+            throw new DbException("Database error: Unable to withdraw.");
         } finally {
             DB.closeStatement(stmt);
         }
     }
-
 };
 
 
