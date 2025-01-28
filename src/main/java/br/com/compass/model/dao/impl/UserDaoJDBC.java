@@ -9,12 +9,12 @@ import br.com.compass.model.entities.enums.AccountType;
 
 import java.sql.*;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
 
 public class UserDaoJDBC implements UserDao {
 
     private final Connection conn;
+    PreparedStatement stmt = null;
+    ResultSet rs = null;
 
     public UserDaoJDBC(Connection conn) {
         this.conn = conn;
@@ -22,8 +22,6 @@ public class UserDaoJDBC implements UserDao {
 
     @Override
     public int insert(String name, LocalDate dateOfBirth, String cpf, String phone, String password) {
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
 
         try {
             String sql = "INSERT INTO users (name, birth_date, cpf, phone, password) VALUES (?, ?, ?, ?, ?)";
@@ -59,8 +57,6 @@ public class UserDaoJDBC implements UserDao {
 
     @Override
     public User findByCPF(String cpf) {
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
 
         try {
             String sql = "SELECT users.*, accounts.account_type, accounts.id AS account_id, accounts.balance AS account_balance " +

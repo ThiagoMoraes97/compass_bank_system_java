@@ -4,7 +4,6 @@ import br.com.compass.db.DbException;
 import br.com.compass.model.dao.AccountDao;
 import br.com.compass.model.dao.DaoFactory;
 import br.com.compass.model.dao.UserDao;
-import br.com.compass.model.entities.Account;
 import br.com.compass.model.entities.User;
 import br.com.compass.model.entities.enums.AccountType;
 

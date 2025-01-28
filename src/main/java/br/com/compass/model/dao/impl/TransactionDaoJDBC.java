@@ -1,6 +1,9 @@
 package br.com.compass.model.dao.impl;
 
+import br.com.compass.model.dao.AccountDao;
+import br.com.compass.model.dao.DaoFactory;
 import br.com.compass.model.dao.TransactionDao;
+import br.com.compass.model.entities.enums.AccountType;
 import br.com.compass.model.entities.enums.TransactionType;
 
 import br.com.compass.db.DB;
@@ -13,6 +16,7 @@ public class TransactionDaoJDBC implements TransactionDao {
 
     private final Connection conn;
     PreparedStatement stmt = null;
+    AccountDao accountDao = DaoFactory.createAccountDao();
 
     public TransactionDaoJDBC(Connection conn) {
         this.conn = conn;
@@ -59,4 +63,22 @@ public class TransactionDaoJDBC implements TransactionDao {
             DB.closeStatement(stmt);
         }
     }
+
+    @Override
+    public void transferTransaction(int user_id, AccountType userAccountType, Double amount, int destination_user_id, AccountType destinationAccountType){
+
+        try{
+            conn.setAutoCommit(false);
+            accountDao.withdraw(user_id, userAccountType, amount);
+            accountDao.deposit(destination_user_id, destinationAccountType, amount);
+            conn.commit();
+        } catch ( SQLException e ) {
+            try{
+                conn.rollback();
+                throw new DbException("Transaction rolled back! Caused by: " + e.getMessage());
+            } catch ( SQLException e1 ) {
+                throw new DbException("Error trying to rollback! Caused by: " + e.getMessage());
+            }
+        }
+    };
 }

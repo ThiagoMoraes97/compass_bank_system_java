@@ -2,6 +2,7 @@ package br.com.compass;
 
 import br.com.compass.model.entities.User;
 import br.com.compass.model.services.AccountService;
+import br.com.compass.model.services.TransactionService;
 import br.com.compass.model.services.UserService;
 
 import java.util.Locale;
@@ -12,6 +13,7 @@ public class App {
     static User user = null;
     static UserService userService = new UserService();
     static AccountService accountService = new AccountService();
+    static TransactionService transactionService = new TransactionService();
 
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
@@ -88,7 +90,7 @@ public class App {
                     System.out.println("Check Balance.");
                     break;
                 case 4:
-                    // ToDo...
+                    transactionService.transferBalance(scanner, user);
                     System.out.println("Transfer.");
                     break;
                 case 5:
