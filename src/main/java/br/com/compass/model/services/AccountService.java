@@ -28,8 +28,10 @@ public class AccountService {
             System.out.print("Enter your CPF (11 digits): ");
             String cpf = sc.nextLine().trim();
 
-            if (cpf.length() != 11 || !cpf.matches("\\d+")) {
-                throw new IllegalArgumentException("CPF must have exactly 11 digits.");
+            while (cpf.isEmpty() ||(cpf.length() != 11 || !cpf.matches("\\d+"))) {
+                System.out.println("Error: CPF must have exactly 11 digits.");
+                System.out.print("Enter your CPF (11 digits): ");
+                cpf = sc.nextLine();
             }
 
             User user = userDao.findByCPF(cpf);
@@ -39,8 +41,17 @@ public class AccountService {
                 return;
             }
 
-            System.out.print("Enter your account type (e.g., Checking or Payroll or Savings): ");
-            AccountType accountType = AccountType.valueOf(sc.nextLine().toUpperCase());
+            AccountType accountType;
+
+            while (true) {
+                System.out.print("Enter your account type (e.g., Checking, Payroll, Savings): ");
+                try {
+                    accountType = AccountType.valueOf(sc.nextLine().toUpperCase());
+                    break;
+                } catch (IllegalArgumentException e) {
+                    System.out.println("Input error: Invalid account type. Accepted values are: Checking, Payroll, Savings.");
+                }
+            }
 
             List<Account> accounts = accountDao.findByUserId(user.getId());
 

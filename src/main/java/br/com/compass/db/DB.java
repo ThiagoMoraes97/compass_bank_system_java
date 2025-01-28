@@ -70,40 +70,40 @@ public class DB {
 
     private static void databaseMigrations() {
         String createUsersTable = """
-            CREATE TABLE IF NOT EXISTS users (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                name VARCHAR(100) NOT NULL,
-                birth_date DATE NOT NULL,
-                cpf VARCHAR(11) UNIQUE NOT NULL,
-                phone VARCHAR(15) NOT NULL,
-                password VARCHAR(255) NOT NULL
-            );
-        """;
+        CREATE TABLE IF NOT EXISTS users (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            name VARCHAR(100) NOT NULL,
+            birth_date DATE NOT NULL,
+            cpf VARCHAR(11) UNIQUE NOT NULL,
+            phone VARCHAR(15) NOT NULL,
+            password VARCHAR(255) NOT NULL
+        );
+    """;
 
         String createAccountsTable = """
-            CREATE TABLE IF NOT EXISTS accounts (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                user_id INT NOT NULL,
-                account_type ENUM('CHECKING', 'PAYROLL', 'SAVINGS') NOT NULL,
-                balance DECIMAL(15,2) DEFAULT 0.00,
-                FOREIGN KEY (user_id) REFERENCES users(id)
-            );
-        """;
+        CREATE TABLE IF NOT EXISTS accounts (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            user_id INT NOT NULL,
+            account_type ENUM('CHECKING', 'PAYROLL', 'SAVINGS') NOT NULL,
+            balance DECIMAL(15,2) DEFAULT 0.00,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        );
+    """;
 
         String createTransactionsTable = """
-            CREATE TABLE IF NOT EXISTS transactions (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                user_id INT NOT NULL,
-                account_id INT NOT NULL,
-                transaction_type ENUM('DEPOSIT', 'WITHDRAW', 'TRANSFER') NOT NULL,
-                amount DECIMAL(15,2) NOT NULL,
-                transaction_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                destination_account_id INT,
-                FOREIGN KEY (account_id) REFERENCES accounts(id),
-                FOREIGN KEY (destination_account_id) REFERENCES accounts(id),
-                FOREIGN KEY (user_id) REFERENCES users(id)
-            );
-        """;
+        CREATE TABLE IF NOT EXISTS transactions (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            user_id INT NOT NULL,
+            account_id INT NOT NULL,
+            transaction_type ENUM('DEPOSIT', 'WITHDRAW', 'TRANSFER') NOT NULL,
+            amount DECIMAL(15,2) NOT NULL,
+            transaction_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            destination_account_id INT,
+            FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE,
+            FOREIGN KEY (destination_account_id) REFERENCES accounts(id),
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        );
+    """;
 
         try (Statement stmt = conn.createStatement()) {
             stmt.execute(createUsersTable);

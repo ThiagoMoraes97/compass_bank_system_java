@@ -31,11 +31,11 @@ public class App {
         }
     }
 
-   public static void mainMenu(Scanner scanner) {
+    public static void mainMenu(Scanner scanner) {
         boolean running = true;
 
         while (running) {
-            try{
+            try {
                 System.out.println("========= Main Menu =========");
                 System.out.println("|| 1. Login                ||");
                 System.out.println("|| 2. Account Opening      ||");
@@ -49,12 +49,16 @@ public class App {
                 switch (option) {
                     case 1:
                         user = userService.loginUser(scanner);
-                        bankMenu(scanner);
-                        return;
+                        if (user != null) {
+                            bankMenu(scanner);
+                        }
+                        break;
                     case 2:
                         accountService.createAccount(scanner);
                         user = userService.loginUser(scanner);
-                        bankMenu(scanner);
+                        if (user != null) {
+                            bankMenu(scanner);
+                        }
                         break;
                     case 0:
                         running = false;
@@ -66,53 +70,53 @@ public class App {
                 System.out.println("Error: " + e.getMessage());
             }
         }
+        System.out.println("Application closed.");
     }
 
     public static void bankMenu(Scanner scanner) {
         boolean running = true;
 
         while (running) {
-           try{
-               System.out.println("========= Bank Menu =========");
-               System.out.println("|| 1. Deposit              ||");
-               System.out.println("|| 2. Withdraw             ||");
-               System.out.println("|| 3. Check Balance        ||");
-               System.out.println("|| 4. Transfer             ||");
-               System.out.println("|| 5. Bank Statement       ||");
-               System.out.println("|| 0. Exit                 ||");
-               System.out.println("=============================");
-               System.out.print("Choose an option: ");
+            try {
+                System.out.println("========= Bank Menu =========");
+                System.out.println("|| 1. Deposit              ||");
+                System.out.println("|| 2. Withdraw             ||");
+                System.out.println("|| 3. Check Balance        ||");
+                System.out.println("|| 4. Transfer             ||");
+                System.out.println("|| 5. Bank Statement       ||");
+                System.out.println("|| 0. Exit to Main Menu    ||");
+                System.out.println("=============================");
+                System.out.print("Choose an option: ");
 
-               int option = scanner.nextInt();
-               scanner.nextLine();
+                int option = scanner.nextInt();
+                scanner.nextLine();
 
-               switch (option) {
-                   case 1:
-                       accountService.deposit(scanner, user);
-                       break;
-                   case 2:
-                       accountService.withdraw(scanner, user);
-                       break;
-                   case 3:
-                       accountService.viewBalance(scanner, user);
-                       break;
-                   case 4:
-                       transactionService.transferBalance(scanner, user);
-                       break;
-                   case 5:
-                       accountService.viewStatement(user);
-                       break;
-                   case 0:
-                       System.out.println("Exiting...");
-                       running = false;
-                       mainMenu(scanner);
-                       return;
-                   default:
-                       System.out.println("Invalid option! Please try again.");
-               }
-           } catch (Exception e) {
-               System.out.println("Error: " + e.getMessage());
-           }
+                switch (option) {
+                    case 1:
+                        accountService.deposit(scanner, user);
+                        break;
+                    case 2:
+                        accountService.withdraw(scanner, user);
+                        break;
+                    case 3:
+                        accountService.viewBalance(scanner, user);
+                        break;
+                    case 4:
+                        transactionService.transferBalance(scanner, user);
+                        break;
+                    case 5:
+                        accountService.viewStatement(user);
+                        break;
+                    case 0:
+                        System.out.println("Exiting to Main Menu...");
+                        running = false;
+                        break;
+                    default:
+                        System.out.println("Invalid option! Please try again.");
+                }
+            } catch (Exception e) {
+                System.out.println("Error: " + e.getMessage());
+            }
         }
     }
 }

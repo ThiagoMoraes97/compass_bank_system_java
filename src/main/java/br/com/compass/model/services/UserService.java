@@ -22,39 +22,68 @@ public class UserService {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
         try {
-            System.out.print("Enter your full name: ");
-            String name = sc.nextLine().trim();
-            if (name.isEmpty()) {
-                throw new IllegalArgumentException("Name cannot be empty.");
+            String name;
+
+            while (true) {
+                System.out.print("Enter your full name: ");
+                name = sc.nextLine().trim();
+
+                if (name.isEmpty()) {
+                    System.out.println("Input error: Name cannot be empty.");
+                    continue;
+                }
+
+                if (!name.matches("[a-zA-Z\\s]+")) {
+                    System.out.println("Input error: Name must contain only letters.");
+                    continue;
+                }
+
+                break;
             }
 
-            System.out.print("Enter your password: ");
-            String password = sc.nextLine().trim();
-            validatePassword(password);
+            String password;
 
-            System.out.print("Enter your date of birth (e.g., DD/MM/YYYY): ");
+            while (true) {
+                System.out.print("Enter your password: ");
+                password = sc.nextLine();
+                try {
+                    validatePassword(password);
+                    break;
+                } catch (IllegalArgumentException e) {
+                    System.out.println("Input error: " + e.getMessage());
+                }
+            }
+
             LocalDate dateOfBirth;
-            try {
-                dateOfBirth = LocalDate.parse(sc.nextLine(), formatter);
-            } catch (Exception e) {
-                throw new IllegalArgumentException("Invalid date format. Please use DD/MM/YYYY.");
+            while (true) {
+                System.out.print("Enter your date of birth (e.g., DD/MM/YYYY): ");
+                try {
+                    dateOfBirth = LocalDate.parse(sc.nextLine(), formatter);
+                    break;
+                } catch (Exception e) {
+                    System.out.println("Input error: Invalid date format. Please use DD/MM/YYYY.");
+                }
             }
 
-            System.out.print("Enter your phone number (e.g., (11) 99999-9999): ");
-            String phone = sc.nextLine().trim();
-            if (phone.isEmpty()) {
-                throw new IllegalArgumentException("Phone number cannot be empty.");
-            }
-            if (!phone.matches("\\(\\d{2}\\) \\d{5}-\\d{4}")) {
-                throw new IllegalArgumentException("Phone number must be in the format (XX) XXXXX-XXXX.");
+            String phone;
+            while (true) {
+                System.out.print("Enter your phone number (e.g., (11) 99999-9999): ");
+                phone = sc.nextLine().trim();
+                if (!phone.isEmpty() && phone.matches("\\(\\d{2}\\) \\d{5}-\\d{4}")) {
+                    break;
+                }
+                System.out.println("Input error: Phone number must be in the format (XX) XXXXX-XXXX.");
             }
 
-            System.out.print("Enter your account type (e.g., Checking or Payroll or Savings): ");
             AccountType accountType;
-            try {
-                accountType = AccountType.valueOf(sc.nextLine().toUpperCase());
-            } catch (IllegalArgumentException e) {
-                throw new IllegalArgumentException("Invalid account type. Accepted values are: Checking, Payroll, Savings.");
+            while (true) {
+                System.out.print("Enter your account type (e.g., Checking, Payroll, Savings): ");
+                try {
+                    accountType = AccountType.valueOf(sc.nextLine().toUpperCase());
+                    break;
+                } catch (IllegalArgumentException e) {
+                    System.out.println("Input error: Invalid account type. Accepted values are: Checking, Payroll, Savings.");
+                }
             }
 
             int user_id = userDao.insert(name, dateOfBirth, cpf, phone, password);
@@ -74,44 +103,77 @@ public class UserService {
     public User loginUser(Scanner sc) {
         System.out.println("========= Account Login =========");
 
-        try {
-            System.out.print("Enter your CPF: ");
-            String cpf = sc.nextLine().trim();
-            if (cpf.isEmpty()) {
-                throw new IllegalArgumentException("CPF cannot be empty.");
+        while (true) {
+            try {
+                System.out.print("Enter your CPF (or type 'exit' to quit): ");
+                String cpf = sc.nextLine().trim();
+
+
+                if (cpf.equalsIgnoreCase("exit")) {
+                    System.out.println("Exiting login process...");
+                    return null;
+                }
+
+
+                while (cpf.isEmpty() || (cpf.length() != 11 || !cpf.matches("\\d+"))) {
+                    System.out.println("Error: CPF must have exactly 11 digits.");
+                    System.out.print("Enter your CPF (11 digits, or type 'exit' to quit): ");
+                    cpf = sc.nextLine().trim();
+
+
+                    if (cpf.equalsIgnoreCase("exit")) {
+                        System.out.println("Exiting login process...");
+                        return null;
+                    }
+                }
+
+                String password;
+
+
+                while (true) {
+                    System.out.print("Enter your password (or type 'exit' to quit): ");
+                    password = sc.nextLine();
+
+
+                    if (password.equalsIgnoreCase("exit")) {
+                        System.out.println("Exiting login process...");
+                        return null;
+                    }
+
+                    try {
+                        validatePassword(password);
+                        break;
+                    } catch (IllegalArgumentException e) {
+                        System.out.println("Input error: " + e.getMessage());
+                    }
+                }
+
+
+                User user = userDao.findByCPF(cpf);
+                if (user == null) {
+                    System.out.println("Authentication error: User not found.");
+                    continue;
+                }
+
+
+                if (user.getPassword().equals(password)) {
+                    System.out.println("Login successful!");
+                    return user;
+                } else {
+                    System.out.println("Authentication error: Incorrect password.");
+                }
+
+            } catch (IllegalArgumentException e) {
+                System.err.println("Input error: " + e.getMessage());
+            } catch (DbException e) {
+                System.err.println("Authentication error: " + e.getMessage());
+            } catch (Exception e) {
+                System.err.println("An unexpected error occurred: " + e.getMessage());
             }
-            if (cpf.length() != 11 || !cpf.matches("\\d+")) {
-                throw new IllegalArgumentException("CPF must have exactly 11 numeric digits.");
-            }
 
-            System.out.print("Enter your password: ");
-            String password = sc.nextLine().trim();
-            validatePassword(password);
 
-            User user = userDao.findByCPF(cpf);
-            if (user == null) {
-                throw new DbException("User or password is incorrect.");
-            }
-
-            if (user.getPassword().equals(password)) {
-                System.out.println("Login successful!");
-            } else {
-                throw new DbException("User or password is incorrect.");
-            }
-
-            return user;
-
-        } catch (IllegalArgumentException e) {
-            System.err.println("Input error: " + e.getMessage());
-            return null;
-        } catch (DbException e) {
-            System.err.println("Authentication error: " + e.getMessage());
-            return null;
-        } catch (Exception e) {
-            System.err.println("An unexpected error occurred: " + e.getMessage());
-            return null;
+            System.out.println("Login failed. Please try again or type 'exit' to quit.\n");
         }
-
     }
 
     public void validatePassword(String password) {
